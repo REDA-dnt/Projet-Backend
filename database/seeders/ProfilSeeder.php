@@ -2,16 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProfilSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $candidats = \App\Models\User::where('role', 'candidat')->get();
+
+        foreach ($candidats as $candidat) {
+            \App\Models\Profil::factory()->create([
+                'user_id' => $candidat->id,
+            ]);
+        }
     }
 }
