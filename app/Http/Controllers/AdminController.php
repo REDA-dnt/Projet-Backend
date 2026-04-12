@@ -1,38 +1,24 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Offre;
+use App\Models\{User, Offre};
 
 class AdminController extends Controller
 {
-    public function listUsers()
+    public function users()
     {
-        $users = User::all();
-        return response()->json($users);
+        return response()->json(User::all());
     }
 
-    public function deleteUser($id)
+    public function deleteUser(User $user)
     {
-        $user = User::findOrFail($id);
         $user->delete();
-
         return response()->json(['message' => 'Utilisateur supprimé']);
     }
 
-    public function listOffres()
+    public function toggleOffre(Offre $offre)
     {
-        $offres = Offre::with('user')->get();
-        return response()->json($offres);
-    }
-
-    public function deleteOffre($id)
-    {
-        $offre = Offre::findOrFail($id);
-        $offre->delete();
-
-        return response()->json(['message' => 'Offre supprimée']);
+        $offre->update(['actif' => !$offre->actif]);
+        return response()->json(['message' => 'Statut de l\'offre mis à jour', 'actif' => $offre->actif]);
     }
 }

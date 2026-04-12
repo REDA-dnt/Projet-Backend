@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{AuthController, ProfilController, OffreController, CandidatureController};
+use App\Http\Controllers\{AuthController, ProfilController, OffreController, CandidatureController, AdminController};
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
@@ -37,5 +37,12 @@ Route::middleware('jwt')->group(function () {
         Route::post('/offres/{offre}/candidater', [CandidatureController::class, 'store']);
         Route::get('/mes-candidatures',           [CandidatureController::class, 'mesCandidatures']);
     });
-    
+
+    // Admin
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/users',                   [AdminController::class, 'users']);
+        Route::delete('/users/{user}',         [AdminController::class, 'deleteUser']);
+        Route::patch('/offres/{offre}',        [AdminController::class, 'toggleOffre']);
+    });
+
 });
