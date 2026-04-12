@@ -1,33 +1,41 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfilController;
-use App\Http\Controllers\CandidatureController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\{AuthController, ProfilController, OffreController, CandidatureController};
 
+// Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('jwt')->group(function () {
+
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
 
-    Route::get('/profil',                     [ProfilController::class, 'show']);
-    Route::put('/profil',                     [ProfilController::class, 'update']);
-    Route::post('/profil/competences',        [ProfilController::class, 'addCompetence']);
-    Route::delete('/profil/competences/{id}', [ProfilController::class, 'removeCompetence']);
-});
+    // Profil: candidats uniquement
+    Route::middleware('role:candidat')->group(function () {
+        Route::post('/profil',                               [ProfilController::class, 'store']);
+        Route::get('/profil',                                [ProfilController::class, 'show']);
+        Route::put('/profil',                                [ProfilController::class, 'update']);
+        Route::post('/profil/competences',                   [ProfilController::class, 'addCompetence']);
+        Route::delete('/profil/competences/{competence}',    [ProfilController::class, 'removeCompetence']);
+    });
 
-Route::middleware('auth:api')->group(function () {
-    Route::post('/offres/{id}/candidater',      [CandidatureController::class, 'postuler']);
-    Route::get('/candidatures/mes',             [CandidatureController::class, 'mesCandidatures']);
-    Route::put('/candidatures/{id}/statut',     [CandidatureController::class, 'updateStatut']);
-});
+    // Offres
+    Route::get('/offres',          [OffreController::class, 'index']);
+    Route::get('/offres/{offre}',  [OffreController::class, 'show']);
 
-Route::middleware(['auth:api', 'checkRole:admin'])->prefix('admin')->group(function () {
-    Route::get('/users',          [AdminController::class, 'listUsers']);
-    Route::delete('/users/{id}',  [AdminController::class, 'deleteUser']);
-    Route::get('/offres',         [AdminController::class, 'listOffres']);
-    Route::delete('/offres/{id}', [AdminController::class, 'deleteOffre']);
+    Route::middleware('role:recruteur')->group(function () {
+        Route::post('/offres',             [OffreController::class, 'store']);
+        Route::put('/offres/{offre}',      [OffreController::class, 'update']);
+        Route::delete('/offres/{offre}',   [OffreController::class, 'destroy']);
+        Route::get('/offres/{offre}/candidatures', [CandidatureController::class, 'index']);
+        Route::patch('/candidatures/{candidature}/statut', [CandidatureController::class, 'updateStatut']);
+    });
+
+    // Candidatures
+    Route::middleware('role:candidat')->group(function () {
+        Route::post('/offres/{offre}/candidater', [CandidatureController::class, 'store']);
+        Route::get('/mes-candidatures',           [CandidatureController::class, 'mesCandidatures']);
+    });
+    
 });

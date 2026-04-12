@@ -1,60 +1,71 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Offre;
+use Illuminate\Http\Request;
 
 class OffreController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $offres = Offre::with('user')->get();
+        $query = Offre::where('actif', true);
+
+        if ($request->has('localisation')) {
+            $query->where('localisation', 'like', '%' . $request->localisation . '%');
+        }
+
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $offres = $query->orderBy('created_at', 'desc')->paginate(10);
+
         return response()->json($offres);
     }
 
-    public function show($id)
+    public function show(Offre $offre)
     {
-        $offre = Offre::with('user')->findOrFail($id);
-        return response()->json($offre);
+        return response()->json($offre->load('recruteur'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'titre'        => 'required|string',
             'description'  => 'required|string',
-            'localite'     => 'required|string',
-            'type_contrat' => 'required|string',
+            'localisation' => 'nullable|string',
+            'type'         => 'required|in:CDI,CDD,stage',
         ]);
 
-        $offre = Offre::create([
-            'user_id'      => auth()->id(),
-            'titre'        => $request->titre,
-            'description'  => $request->description,
-            'localite'     => $request->localite,
-            'type_contrat' => $request->type_contrat,
-        ]);
+        $offre = auth('api')->user()->offres()->create($data);
 
         return response()->json($offre, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Offre $offre)
     {
-        $offre = Offre::where('user_id', auth()->id())
-                      ->findOrFail($id);
+        if ($offre->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Accès refusé'], 403);
+        }
 
-        $offre->update($request->only([
-            'titre', 'description', 'localite', 'type_contrat'
-        ]));
+        $data = $request->validate([
+            'titre'        => 'sometimes|string',
+            'description'  => 'sometimes|string',
+            'localisation' => 'nullable|string',
+            'type'         => 'sometimes|in:CDI,CDD,stage',
+        ]);
+
+        $offre->update($data);
 
         return response()->json($offre);
     }
 
-    public function destroy($id)
+    public function destroy(Offre $offre)
     {
-        $offre = Offre::where('user_id', auth()->id())
-                      ->findOrFail($id);
+        if ($offre->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Accès refusé'], 403);
+        }
+
         $offre->delete();
 
         return response()->json(['message' => 'Offre supprimée']);
