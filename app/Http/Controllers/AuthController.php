@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -24,7 +25,11 @@ class AuthController extends Controller
 
         $token = auth('api')->login($user);
 
-        return $this->respondWithToken($token);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'bearer',
+            'user' => $user
+        ], 201);
     }
 
     public function login(Request $request)
@@ -38,27 +43,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'Identifiants invalides'], 401);
         }
 
-        return $this->respondWithToken($token);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'bearer',
+            'user' => auth('api')->user()
+        ]);
     }
 
     public function logout()
     {
         auth('api')->logout();
+
         return response()->json(['message' => 'Déconnecté']);
     }
 
     public function me()
     {
         return response()->json(auth('api')->user());
-    }
-
-    protected function respondWithToken(string $token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type'   => 'bearer',
-            'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'user'         => auth('api')->user(),
-        ]);
     }
 }
