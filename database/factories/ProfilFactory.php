@@ -2,17 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\Profil;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Profil>
+ */
 class ProfilFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'titre'        => $this->faker->jobTitle(),
-            'bio'          => $this->faker->paragraph(),
-            'localisation' => $this->faker->city(),
-            'disponible'   => $this->faker->boolean(70),
+            'user_id' => User::factory(),
+            'titre' => fake()->jobTitle(),
+            'bio' => fake()->paragraph(),
+            'localisation' => fake()->city(),
+            'disponible' => fake()->boolean(80),
         ];
     }
 }
