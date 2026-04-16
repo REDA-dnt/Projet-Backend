@@ -2,18 +2,26 @@
 
 namespace Database\Factories;
 
+use App\Models\Offre;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Offre>
+ */
 class OffreFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'titre'        => $this->faker->jobTitle(),
-            'description'  => $this->faker->paragraph(),
-            'localisation' => $this->faker->city(),
-            'type'         => $this->faker->randomElement(['CDI', 'CDD', 'stage']),
-            'actif'        => $this->faker->boolean(80),
+            'user_id' => User::factory()->state([
+                'role' => 'recruteur'
+            ]),
+            'titre' => fake()->jobTitle(),
+            'description' => fake()->paragraphs(3, true),
+            'localisation' => fake()->city(),
+            'type' => fake()->randomElement(['CDI', 'CDD', 'stage']),
+            'actif' => true,
         ];
     }
 }
