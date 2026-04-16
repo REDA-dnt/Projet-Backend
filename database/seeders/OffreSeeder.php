@@ -2,18 +2,22 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class OffreSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
-    {
-        $recruteurs = \App\Models\User::where('role', 'recruteur')->get();
+{
+    $recruteurs = User::where('role', 'recruteur')->get();
 
-        foreach ($recruteurs as $recruteur) {
-            \App\Models\Offre::factory(rand(2, 3))->create([
-                'user_id' => $recruteur->id,
-            ]);
-        }
+    foreach ($recruteurs as $user) {
+        Offre::factory()->count(rand(2, 3))->create([
+            'user_id' => $user->id
+        ]);
     }
+}
 }
