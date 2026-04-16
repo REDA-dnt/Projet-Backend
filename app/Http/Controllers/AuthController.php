@@ -3,7 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -25,7 +24,7 @@ class AuthController extends Controller
 
         $token = auth('api')->login($user);
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return $this->respondWithToken($token);
     }
 
     public function login(Request $request)
@@ -39,7 +38,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Identifiants invalides'], 401);
         }
 
-        return response()->json(['token' => $token]);
+        return $this->respondWithToken($token);
     }
 
     public function logout()
@@ -51,5 +50,15 @@ class AuthController extends Controller
     public function me()
     {
         return response()->json(auth('api')->user());
+    }
+
+    protected function respondWithToken(string $token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type'   => 'bearer',
+            'expires_in'   => auth('api')->factory()->getTTL() * 60,
+            'user'         => auth('api')->user(),
+        ]);
     }
 }
