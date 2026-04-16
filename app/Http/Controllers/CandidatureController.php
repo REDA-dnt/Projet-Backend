@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Candidature;
 use App\Models\Offre;
+use App\Events\CandidaturePostulee;
 
 class CandidatureController extends Controller
 {
@@ -26,6 +27,8 @@ class CandidatureController extends Controller
             'statut'   => 'en_attente',
             'message'  => $request->message,
         ]);
+
+        event(new CandidaturePostulee($candidature));
 
         return response()->json($candidature, 201);
     }
