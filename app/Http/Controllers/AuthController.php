@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -25,7 +25,11 @@ class AuthController extends Controller
 
         $token = auth('api')->login($user);
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'bearer',
+            'user' => $user
+        ], 201);
     }
 
     public function login(Request $request)
@@ -39,12 +43,17 @@ class AuthController extends Controller
             return response()->json(['message' => 'Identifiants invalides'], 401);
         }
 
-        return response()->json(['token' => $token]);
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'bearer',
+            'user' => auth('api')->user()
+        ]);
     }
 
     public function logout()
     {
         auth('api')->logout();
+
         return response()->json(['message' => 'Déconnecté']);
     }
 

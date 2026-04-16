@@ -6,9 +6,14 @@ use App\Models\Candidature;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class CandidaturePostulee
+class CandidatureDeposee
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Candidature $candidature) {}
+    public Candidature $candidature;
+
+    public function __construct(Candidature $candidature)
+    {
+        $this->candidature = $candidature;
+    }
 }

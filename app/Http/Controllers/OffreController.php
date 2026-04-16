@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Offre;
@@ -10,15 +11,16 @@ class OffreController extends Controller
     {
         $query = Offre::where('actif', true);
 
-        if ($request->has('localisation')) {
+        if ($request->filled('localisation')) {
             $query->where('localisation', 'like', '%' . $request->localisation . '%');
         }
 
-        if ($request->has('type')) {
+        if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        $offres = $query->orderBy('created_at', 'desc')->paginate(10);
+        $offres = $query->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return response()->json($offres);
     }
@@ -30,6 +32,10 @@ class OffreController extends Controller
 
     public function store(Request $request)
     {
+        if (auth('api')->user()->role !== 'recruteur') {
+            return response()->json(['message' => 'Accès refusé'], 403);
+        }
+
         $data = $request->validate([
             'titre'        => 'required|string',
             'description'  => 'required|string',
@@ -51,7 +57,7 @@ class OffreController extends Controller
         $data = $request->validate([
             'titre'        => 'sometimes|string',
             'description'  => 'sometimes|string',
-            'localisation' => 'nullable|string',
+            'localisation' => 'sometimes|string',
             'type'         => 'sometimes|in:CDI,CDD,stage',
         ]);
 

@@ -2,18 +2,21 @@
 
 namespace App\Listeners;
 
-use App\Events\CandidaturePostulee;
+use App\Events\CandidatureDeposee;
 use Illuminate\Support\Facades\Log;
 
-class LogCandidature
+class LogCandidatureDeposee
 {
-    public function handle(CandidaturePostulee $event): void
+    public function handle(CandidatureDeposee $event): void
     {
-        Log::channel('candidatures')->info('Nouvelle candidature', [
-            'user_id'  => $event->candidature->user_id,
-            'offre_id' => $event->candidature->offre_id,
-            'statut'   => $event->candidature->statut,
-            'at'       => now(),
+        $candidature = $event->candidature;
+
+        Log::info('Nouvelle candidature déposée', [
+            'candidature_id' => $candidature->id,
+            'profil_id'      => $candidature->profil_id,
+            'offre_id'       => $candidature->offre_id,
+            'statut'         => $candidature->statut,
+            'date'           => now(),
         ]);
     }
 }

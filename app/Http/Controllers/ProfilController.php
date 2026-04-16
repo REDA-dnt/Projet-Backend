@@ -11,29 +11,51 @@ class ProfilController extends Controller
     public function show()
     {
         $profil = Profil::with('competences')
-                        ->where('user_id', auth()->id())
-                        ->first();
+            ->where('user_id', auth()->id())
+            ->first();
 
         return response()->json($profil);
     }
 
     public function update(Request $request)
     {
+        $request->validate([
+            'titre' => 'sometimes|string',
+            'bio' => 'sometimes|string',
+            'localisation' => 'sometimes|string',
+        ]);
+
         $profil = Profil::where('user_id', auth()->id())->first();
 
-        $profil->update($request->only(['bio', 'titre', 'localite']));
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+
+        $profil->update($request->only(['titre', 'bio', 'localisation']));
 
         return response()->json($profil);
     }
 
     public function addCompetence(Request $request)
     {
-        $request->validate(['nom' => 'required|string']);
+        $request->validate([
+            'nom' => 'required|string',
+            'niveau' => 'required|in:debutant,intermediaire,expert'
+        ]);
 
-        $competence = Competence::firstOrCreate(['nom' => $request->nom]);
+        $competence = Competence::firstOrCreate([
+            'nom' => $request->nom
+        ]);
 
         $profil = Profil::where('user_id', auth()->id())->first();
-        $profil->competences()->attach($competence->id);
+
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+
+        $profil->competences()->syncWithoutDetaching([
+            $competence->id => ['niveau' => $request->niveau]
+        ]);
 
         return response()->json(['message' => 'Compétence ajoutée']);
     }
@@ -41,6 +63,11 @@ class ProfilController extends Controller
     public function removeCompetence($id)
     {
         $profil = Profil::where('user_id', auth()->id())->first();
+
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+
         $profil->competences()->detach($id);
 
         return response()->json(['message' => 'Compétence supprimée']);
