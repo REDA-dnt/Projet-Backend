@@ -2,28 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        \App\Models\User::factory()->create([
-            'name'     => 'Admin Principal',
-            'email'    => 'admin@mini-linkedin.com',
-            'password' => bcrypt('password'),
-            'role'     => 'admin',
+        User::factory()->count(2)->create([
+            'role' => 'admin',
+            'password' => bcrypt('password')
         ]);
 
-        \App\Models\User::factory()->create([
-            'name'     => 'Admin Second',
-            'email'    => 'admin2@mini-linkedin.com',
-            'password' => bcrypt('password'),
-            'role'     => 'admin',
+        User::factory()->count(5)->create([
+            'role' => 'recruteur',
+            'password' => bcrypt('password')
         ]);
 
-        \App\Models\User::factory(5)->create(['role' => 'recruteur']);
-
-        \App\Models\User::factory(10)->create(['role' => 'candidat']);
+        User::factory()->count(10)->create([
+            'role' => 'candidat',
+            'password' => bcrypt('password')
+        ]);
     }
 }
