@@ -2,67 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Profil;
 use App\Models\Competence;
+use App\Models\Profil;
+use Illuminate\Http\Request;
 
 class ProfilController extends Controller
 {
+    public function store(Request $request)
+    {
+        if (Profil::where('user_id', auth('api')->id())->exists()) {
+            return response()->json(['message' => 'Profil déjà existant'], 409);
+        }
+
+        $data = $request->validate([
+            'titre'        => 'required|string|max:255',
+            'bio'          => 'nullable|string',
+            'localisation' => 'nullable|string|max:255',
+            'disponible'   => 'nullable|boolean',
+        ]);
+
+        $profil = Profil::create(array_merge($data, [
+            'user_id' => auth('api')->id(),
+        ]));
+
+        return response()->json($profil->load('competences'), 201);
+    }
+
     public function show()
     {
         $profil = Profil::with('competences')
-            ->where('user_id', auth()->id())
+            ->where('user_id', auth('api')->id())
             ->first();
+
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
 
         return response()->json($profil);
     }
 
     public function update(Request $request)
     {
-        $request->validate([
-            'titre' => 'sometimes|string',
-            'bio' => 'sometimes|string',
-            'localisation' => 'sometimes|string',
-        ]);
-
-        $profil = Profil::where('user_id', auth()->id())->first();
+        $profil = Profil::where('user_id', auth('api')->id())->first();
 
         if (!$profil) {
             return response()->json(['message' => 'Profil introuvable'], 404);
         }
 
-        $profil->update($request->only(['titre', 'bio', 'localisation']));
+        $data = $request->validate([
+            'titre'        => 'sometimes|string|max:255',
+            'bio'          => 'sometimes|string',
+            'localisation' => 'sometimes|string|max:255',
+            'disponible'   => 'sometimes|boolean',
+        ]);
 
-        return response()->json($profil);
+        $profil->update($data);
+
+        return response()->json($profil->load('competences'));
     }
 
     public function addCompetence(Request $request)
     {
-        $request->validate([
-            'nom' => 'required|string',
-            'niveau' => 'required|in:debutant,intermediaire,expert'
+        $data = $request->validate([
+            'nom'    => 'required|string|max:255',
+            'niveau' => 'required|in:debutant,intermediaire,expert',
         ]);
 
-        $competence = Competence::firstOrCreate([
-            'nom' => $request->nom
-        ]);
-
-        $profil = Profil::where('user_id', auth()->id())->first();
+        $profil = Profil::where('user_id', auth('api')->id())->first();
 
         if (!$profil) {
             return response()->json(['message' => 'Profil introuvable'], 404);
         }
 
+        $competence = Competence::firstOrCreate(['nom' => $data['nom']]);
+
         $profil->competences()->syncWithoutDetaching([
-            $competence->id => ['niveau' => $request->niveau]
+            $competence->id => ['niveau' => $data['niveau']],
         ]);
 
-        return response()->json(['message' => 'CompÃ©tence ajoutÃ©e']);
+        return response()->json(['message' => 'Compétence ajoutée', 'competence' => $competence]);
     }
 
-    public function removeCompetence($id)
+    public function removeCompetence(int $id)
     {
-        $profil = Profil::where('user_id', auth()->id())->first();
+        $profil = Profil::where('user_id', auth('api')->id())->first();
 
         if (!$profil) {
             return response()->json(['message' => 'Profil introuvable'], 404);
@@ -70,6 +93,6 @@ class ProfilController extends Controller
 
         $profil->competences()->detach($id);
 
-        return response()->json(['message' => 'CompÃ©tence supprimÃ©e']);
+        return response()->json(['message' => 'Compétence supprimée']);
     }
 }
