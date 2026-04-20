@@ -9,20 +9,19 @@ class OffreController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Offre::where('actif', true);
+        $query = Offre::with('recruteur')->where('actif', true);
 
         if ($request->filled('localisation')) {
-            $query->where('localisation', 'like', '%' . $request->localisation . '%');
+            $query->where('localisation', 'like', '%'.$request->localisation.'%');
         }
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        $offres = $query->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return response()->json($offres);
+        return response()->json(
+            $query->orderBy('created_at', 'desc')->paginate(10)
+        );
     }
 
     public function show(Offre $offre)
@@ -32,14 +31,10 @@ class OffreController extends Controller
 
     public function store(Request $request)
     {
-        if (auth('api')->user()->role !== 'recruteur') {
-            return response()->json(['message' => 'Accès refusé'], 403);
-        }
-
         $data = $request->validate([
-            'titre'        => 'required|string',
+            'titre'        => 'required|string|max:255',
             'description'  => 'required|string',
-            'localisation' => 'nullable|string',
+            'localisation' => 'nullable|string|max:255',
             'type'         => 'required|in:CDI,CDD,stage',
         ]);
 
@@ -51,13 +46,13 @@ class OffreController extends Controller
     public function update(Request $request, Offre $offre)
     {
         if ($offre->user_id !== auth('api')->id()) {
-            return response()->json(['message' => 'Accès refusé'], 403);
+            return response()->json(['message' => 'Action non autorisée'], 403);
         }
 
         $data = $request->validate([
-            'titre'        => 'sometimes|string',
+            'titre'        => 'sometimes|string|max:255',
             'description'  => 'sometimes|string',
-            'localisation' => 'sometimes|string',
+            'localisation' => 'sometimes|string|max:255',
             'type'         => 'sometimes|in:CDI,CDD,stage',
         ]);
 
@@ -69,7 +64,7 @@ class OffreController extends Controller
     public function destroy(Offre $offre)
     {
         if ($offre->user_id !== auth('api')->id()) {
-            return response()->json(['message' => 'Accès refusé'], 403);
+            return response()->json(['message' => 'Action non autorisée'], 403);
         }
 
         $offre->delete();

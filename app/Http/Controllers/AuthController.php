@@ -10,13 +10,13 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'     => 'required|string',
+            'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6',
             'role'     => 'required|in:candidat,recruteur',
         ]);
 
-        $user = User::create([
+        $user  = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => bcrypt($data['password']),
@@ -26,9 +26,9 @@ class AuthController extends Controller
         $token = auth('api')->login($user);
 
         return response()->json([
-            'token' => $token,
+            'token'      => $token,
             'token_type' => 'bearer',
-            'user' => $user
+            'user'       => $user,
         ], 201);
     }
 
@@ -40,14 +40,19 @@ class AuthController extends Controller
         ]);
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(['message' => 'Identifiants invalides'], 401);
+            return response()->json(['message' => 'Email ou mot de passe incorrect'], 401);
         }
 
         return response()->json([
-            'token' => $token,
+            'token'      => $token,
             'token_type' => 'bearer',
-            'user' => auth('api')->user()
+            'user'       => auth('api')->user(),
         ]);
+    }
+
+    public function me()
+    {
+        return response()->json(auth('api')->user());
     }
 
     public function logout()
@@ -55,10 +60,5 @@ class AuthController extends Controller
         auth('api')->logout();
 
         return response()->json(['message' => 'Déconnecté']);
-    }
-
-    public function me()
-    {
-        return response()->json(auth('api')->user());
     }
 }

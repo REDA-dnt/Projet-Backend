@@ -3,13 +3,17 @@
 return [
 
     'defaults' => [
-        'guard' => 'api',
+        'guard'     => 'web',
         'passwords' => 'users',
     ],
 
     'guards' => [
+        'web' => [
+            'driver'   => 'session',
+            'provider' => 'users',
+        ],
         'api' => [
-            'driver' => 'jwt',
+            'driver'   => 'jwt',
             'provider' => 'users',
         ],
     ],
@@ -17,18 +21,19 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model'  => App\Models\User::class,
         ],
     ],
 
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
+            'table'    => 'password_reset_tokens',
+            'expire'   => 60,
             'throttle' => 60,
         ],
     ],
 
     'password_timeout' => 10800,
+
 ];
