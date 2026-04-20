@@ -17,8 +17,8 @@ class ProfilSeeder extends Seeder
         foreach ($candidats as $user) {
             $profil = Profil::create([
                 'user_id'      => $user->id,
-                'titre'        => 'Développeur Fullstack',
-                'bio'          => 'Passionné par Laravel et React.',
+                'titre'        => 'Dï¿½veloppeur Fullstack',
+                'bio'          => 'Passionnï¿½ par Laravel et React.',
                 'localisation' => 'Casablanca',
                 'disponible'   => true,
             ]);

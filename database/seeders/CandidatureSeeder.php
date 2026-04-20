@@ -24,7 +24,7 @@ class CandidatureSeeder extends Seeder
             foreach ($offresSelectionnees as $offre) {
                 Candidature::firstOrCreate(
                     ['offre_id' => $offre->id, 'profil_id' => $profil->id],
-                    ['message' => 'Je suis très intéressé par ce poste.', 'statut' => 'en_attente']
+                    ['message' => 'Je suis trï¿½s intï¿½ressï¿½ par ce poste.', 'statut' => 'en_attente']
                 );
             }
         }
