@@ -127,6 +127,18 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'candidatures' => [
+            'driver' => 'single',
+            'path'   => storage_path('logs/candidatures.log'),
+             'level'  => 'info',
+        ],
+
+        'offres' => [
+            'driver' => 'single',
+            'path'   => storage_path('logs/offres.log'),
+            'level'  => 'info',
+        ],
+
     ],
 
 ];

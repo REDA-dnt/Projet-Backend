@@ -15,9 +15,4 @@ class EventServiceProvider extends ServiceProvider
             \App\Listeners\LogStatutCandidatureMis::class,
         ],
     ];
-
-    public function boot(): void
-    {
-        parent::boot();
-    }
 }
