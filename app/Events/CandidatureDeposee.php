@@ -2,13 +2,13 @@
 
 namespace App\Events;
 
-use App\Models\Offre;
+use App\Models\Candidature;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OffreCreee
+class CandidatureDeposee
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Offre $offre) {}
+    public function __construct(public Candidature $candidature) {}
 }
