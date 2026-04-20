@@ -10,14 +10,9 @@ class StatutCandidatureMis
 {
     use Dispatchable, SerializesModels;
 
-    public Candidature $candidature;
-    public string $ancienStatut;
-    public string $nouveauStatut;
-
-    public function __construct(Candidature $candidature, string $ancienStatut, string $nouveauStatut)
-    {
-        $this->candidature = $candidature;
-        $this->ancienStatut = $ancienStatut;
-        $this->nouveauStatut = $nouveauStatut;
-    }
+    public function __construct(
+        public Candidature $candidature,
+        public string $ancienStatut,
+        public string $nouveauStatut,
+    ) {}
 }

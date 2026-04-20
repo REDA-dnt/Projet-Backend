@@ -9,13 +9,11 @@ class LogStatutCandidatureMis
 {
     public function handle(StatutCandidatureMis $event): void
     {
-        $candidature = $event->candidature;
-
-        Log::info("STATUT CANDIDATURE MODIFIÃ‰", [
-            'candidature_id' => $candidature->id,
-            'ancien_statut'  => $candidature->getOriginal('statut'),
-            'nouveau_statut' => $candidature->statut,
-            'date'           => now(),
+        Log::channel('candidatures')->info('Statut candidature modifié', [
+            'date'           => now()->toDateTimeString(),
+            'candidature_id' => $event->candidature->id,
+            'ancien_statut'  => $event->ancienStatut,
+            'nouveau_statut' => $event->nouveauStatut,
         ]);
     }
 }

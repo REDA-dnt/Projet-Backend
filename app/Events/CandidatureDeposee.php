@@ -10,10 +10,5 @@ class CandidatureDeposee
 {
     use Dispatchable, SerializesModels;
 
-    public Candidature $candidature;
-
-    public function __construct(Candidature $candidature)
-    {
-        $this->candidature = $candidature;
-    }
+    public function __construct(public Candidature $candidature) {}
 }
