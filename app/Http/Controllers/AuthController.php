@@ -1,22 +1,22 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'     => 'required|string',
+            'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
             'password' => 'required|min:6',
             'role'     => 'required|in:candidat,recruteur',
         ]);
 
-        $user = User::create([
+        $user  = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => bcrypt($data['password']),
@@ -25,7 +25,11 @@ class AuthController extends Controller
 
         $token = auth('api')->login($user);
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return response()->json([
+            'token'      => $token,
+            'token_type' => 'bearer',
+            'user'       => $user,
+        ], 201);
     }
 
     public function login(Request $request)
@@ -36,20 +40,25 @@ class AuthController extends Controller
         ]);
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(['message' => 'Identifiants invalides'], 401);
+            return response()->json(['message' => 'Email ou mot de passe incorrect'], 401);
         }
 
-        return response()->json(['token' => $token]);
-    }
-
-    public function logout()
-    {
-        auth('api')->logout();
-        return response()->json(['message' => 'Déconnecté']);
+        return response()->json([
+            'token'      => $token,
+            'token_type' => 'bearer',
+            'user'       => auth('api')->user(),
+        ]);
     }
 
     public function me()
     {
         return response()->json(auth('api')->user());
+    }
+
+    public function logout()
+    {
+        auth('api')->logout();
+
+        return response()->json(['message' => 'Déconnecté']);
     }
 }

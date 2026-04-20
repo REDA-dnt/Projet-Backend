@@ -2,51 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Events\CandidatureDeposee;
+use App\Events\StatutCandidatureMis;
 use App\Models\Candidature;
 use App\Models\Offre;
+use App\Models\Profil;
+use Illuminate\Http\Request;
 
 class CandidatureController extends Controller
 {
-    public function postuler(Request $request, $id)
+    public function postuler(Request $request, Offre $offre)
     {
-        $offre = Offre::findOrFail($id);
+        $request->validate([
+            'message' => 'nullable|string',
+        ]);
 
-        $dejaCandidatÃ© = Candidature::where('user_id', auth()->id())
-                                    ->where('offre_id', $id)
-                                    ->exists();
+        $profil = Profil::where('user_id', auth('api')->id())->first();
 
-        if ($dejaCandidatÃ©) {
-            return response()->json(['message' => 'Vous avez dÃ©jÃ  postulÃ©'], 409);
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+
+        if (!$offre->actif) {
+            return response()->json(['message' => 'Cette offre n\'est plus active'], 422);
+        }
+
+        $existe = Candidature::where('profil_id', $profil->id)
+            ->where('offre_id', $offre->id)
+            ->exists();
+
+        if ($existe) {
+            return response()->json(['message' => 'Vous avez déjà postulé à cette offre'], 409);
         }
 
         $candidature = Candidature::create([
-            'user_id'  => auth()->id(),
-            'offre_id' => $id,
-            'statut'   => 'en_attente',
-            'message'  => $request->message,
+            'profil_id' => $profil->id,
+            'offre_id'  => $offre->id,
+            'statut'    => 'en_attente',
+            'message'   => $request->message,
         ]);
 
-        return response()->json($candidature, 201);
+        event(new CandidatureDeposee($candidature));
+
+        return response()->json($candidature->load('offre'), 201);
     }
 
     public function mesCandidatures()
     {
+        $profil = Profil::where('user_id', auth('api')->id())->first();
+
+        if (!$profil) {
+            return response()->json(['message' => 'Profil introuvable'], 404);
+        }
+
         $candidatures = Candidature::with('offre')
-                                   ->where('user_id', auth()->id())
-                                   ->get();
+            ->where('profil_id', $profil->id)
+            ->get();
 
         return response()->json($candidatures);
     }
 
-    public function updateStatut(Request $request, $id)
+    public function offreCandidatures(Offre $offre)
+    {
+        if ($offre->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Action non autorisée'], 403);
+        }
+
+        $candidatures = $offre->candidatures()->with('profil.user')->get();
+
+        return response()->json($candidatures);
+    }
+
+    public function updateStatut(Request $request, Candidature $candidature)
     {
         $request->validate([
-            'statut' => 'required|in:en_attente,accepte,refuse'
+            'statut' => 'required|in:en_attente,acceptee,refusee',
         ]);
 
-        $candidature = Candidature::findOrFail($id);
+        if ($candidature->offre->user_id !== auth('api')->id()) {
+            return response()->json(['message' => 'Action non autorisée'], 403);
+        }
+
+        $ancienStatut = $candidature->statut;
+
         $candidature->update(['statut' => $request->statut]);
+
+        event(new StatutCandidatureMis($candidature, $ancienStatut, $request->statut));
 
         return response()->json($candidature);
     }

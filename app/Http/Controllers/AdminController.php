@@ -2,37 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Offre;
+use App\Models\User;
 
 class AdminController extends Controller
 {
-    public function listUsers()
+    public function users()
     {
-        $users = User::all();
-        return response()->json($users);
+        return response()->json(User::paginate(10));
     }
 
-    public function deleteUser($id)
+    public function deleteUser(User $user)
     {
-        $user = User::findOrFail($id);
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Impossible de supprimer un administrateur'], 403);
+        }
+
         $user->delete();
 
         return response()->json(['message' => 'Utilisateur supprimé']);
     }
 
-    public function listOffres()
+    public function toggleOffre(Offre $offre)
     {
-        $offres = Offre::with('user')->get();
-        return response()->json($offres);
-    }
+        $offre->update(['actif' => !$offre->actif]);
 
-    public function deleteOffre($id)
-    {
-        $offre = Offre::findOrFail($id);
-        $offre->delete();
-
-        return response()->json(['message' => 'Offre supprimée']);
+        return response()->json([
+            'message' => 'Statut de l\'offre mis à jour',
+            'actif'   => $offre->actif,
+        ]);
     }
 }
