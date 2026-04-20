@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('candidatures', function (Blueprint $table) {
@@ -18,13 +15,10 @@ return new class extends Migration
             $table->text('message')->nullable();
             $table->enum('statut', ['en_attente', 'acceptee', 'refusee'])->default('en_attente');
             $table->timestamps();
-            $table->unique(['offre_id', 'profil_id']); // un candidat postule une seule fois
+            $table->unique(['offre_id', 'profil_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('candidatures');

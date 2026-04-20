@@ -2,22 +2,25 @@
 
 namespace App\Providers;
 
+use App\Events\CandidatureDeposee;
+use App\Events\StatutCandidatureMis;
+use App\Listeners\LogCandidatureDeposee;
+use App\Listeners\LogStatutCandidatureMis;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        \App\Events\CandidatureDeposee::class => [
-            \App\Listeners\LogCandidatureDeposee::class,
+        CandidatureDeposee::class => [
+            LogCandidatureDeposee::class,
         ],
-
-        \App\Events\StatutCandidatureMis::class => [
-            \App\Listeners\LogStatutCandidatureMis::class,
+        StatutCandidatureMis::class => [
+            LogStatutCandidatureMis::class,
         ],
     ];
 
     public function boot(): void
     {
-        //
+        parent::boot();
     }
 }

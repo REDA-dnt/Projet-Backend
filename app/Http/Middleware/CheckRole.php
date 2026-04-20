@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $role)
+    public function handle(Request $request, Closure $next, string ...$roles): mixed
     {
         $user = auth('api')->user();
 
@@ -15,8 +15,8 @@ class CheckRole
             return response()->json(['message' => 'Non authentifié'], 401);
         }
 
-        if ($user->role !== $role) {
-            return response()->json(['message' => 'Accès refusé'], 403);
+        if (!in_array($user->role, $roles)) {
+            return response()->json(['message' => 'Accès refusé — rôle insuffisant'], 403);
         }
 
         return $next($request);

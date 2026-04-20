@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Profil;
+use Illuminate\Database\Eloquent\Model;
 
 class Competence extends Model
 {
@@ -14,7 +13,7 @@ class Competence extends Model
 
     public function profils()
     {
-        return $this->belongsToMany(Profil::class, 'profil_competence')
-            ->withPivot('niveau');
+        return $this->belongsToMany(Profil::class, 'competence_profil')
+                    ->withPivot('niveau');
     }
 }

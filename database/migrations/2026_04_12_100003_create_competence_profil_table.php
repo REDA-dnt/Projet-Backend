@@ -6,24 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('profil_competence', function (Blueprint $table) {
-            $table->foreignId('profil_id')->constrained()->onDelete('cascade');
+        Schema::create('competence_profil', function (Blueprint $table) {
             $table->foreignId('competence_id')->constrained()->onDelete('cascade');
+            $table->foreignId('profil_id')->constrained()->onDelete('cascade');
             $table->enum('niveau', ['debutant', 'intermediaire', 'expert']);
-            $table->primary(['profil_id', 'competence_id']);
+            $table->primary(['competence_id', 'profil_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('profil_competence');
+        Schema::dropIfExists('competence_profil');
     }
 };
