@@ -2,35 +2,34 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Competence;
 use App\Models\Profil;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class ProfilSeeder extends Seeder
 {
     public function run(): void
     {
-        $candidats = User::where('role', 'candidat')->get();
+        $candidats   = User::where('role', 'candidat')->get();
         $competences = Competence::all();
 
         foreach ($candidats as $user) {
-
             $profil = Profil::create([
-                'user_id' => $user->id,
-                'titre' => 'Développeur Fullstack',
-                'bio' => 'Passionné par Laravel et React.',
+                'user_id'      => $user->id,
+                'titre'        => 'D�veloppeur Fullstack',
+                'bio'          => 'Passionn� par Laravel et React.',
                 'localisation' => 'Casablanca',
-                'disponible' => true,
+                'disponible'   => true,
             ]);
 
-            $randomCompetences = $competences->count() >= 3
+            $selection = $competences->count() >= 3
                 ? $competences->random(3)
                 : $competences;
 
-            foreach ($randomCompetences as $comp) {
-                $profil->competences()->attach($comp->id, [
-                    'niveau' => 'intermediaire'
+            foreach ($selection as $competence) {
+                $profil->competences()->attach($competence->id, [
+                    'niveau' => 'intermediaire',
                 ]);
             }
         }
