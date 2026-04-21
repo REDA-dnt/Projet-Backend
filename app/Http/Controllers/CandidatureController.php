@@ -32,7 +32,7 @@ class CandidatureController extends Controller
             ->exists();
 
         if ($existe) {
-            return response()->json(['message' => 'Vous avez déjà postulé à cette offre'], 409);
+            return response()->json(['message' => 'Vous avez dÃ©jÃ  postulÃ© Ã  cette offre'], 409);
         }
 
         $candidature = Candidature::create([
@@ -65,7 +65,7 @@ class CandidatureController extends Controller
     public function offreCandidatures(Offre $offre)
     {
         if ($offre->user_id !== auth('api')->id()) {
-            return response()->json(['message' => 'Action non autorisée'], 403);
+            return response()->json(['message' => 'Action non autorisÃ©e'], 403);
         }
 
         $candidatures = $offre->candidatures()->with('profil.user')->get();
@@ -80,7 +80,7 @@ class CandidatureController extends Controller
         ]);
 
         if ($candidature->offre->user_id !== auth('api')->id()) {
-            return response()->json(['message' => 'Action non autorisée'], 403);
+            return response()->json(['message' => 'Action non autorisÃ©e'], 403);
         }
 
         $ancienStatut = $candidature->statut;

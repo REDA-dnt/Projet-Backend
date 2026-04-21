@@ -11,7 +11,7 @@ class ProfilController extends Controller
     public function store(Request $request)
     {
         if (Profil::where('user_id', auth('api')->id())->exists()) {
-            return response()->json(['message' => 'Profil déjà existant'], 409);
+            return response()->json(['message' => 'Profil deja existant'], 409);
         }
 
         $data = $request->validate([
@@ -80,7 +80,7 @@ class ProfilController extends Controller
             $competence->id => ['niveau' => $data['niveau']],
         ]);
 
-        return response()->json(['message' => 'Compétence ajoutée', 'competence' => $competence]);
+        return response()->json(['message' => 'Competence ajoutee', 'competence' => $competence]);
     }
 
     public function removeCompetence(int $id)
@@ -93,6 +93,6 @@ class ProfilController extends Controller
 
         $profil->competences()->detach($id);
 
-        return response()->json(['message' => 'Compétence supprimée']);
+        return response()->json(['message' => 'Competence supprimee']);
     }
 }
